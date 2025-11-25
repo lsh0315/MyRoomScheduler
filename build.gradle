@@ -2,6 +2,9 @@ plugins {
     id 'java'
 }
 
+sourceCompatibility = '21'
+targetCompatibility = '21'
+
 group = 'org.example'
 version = '1.0-SNAPSHOT'
 
@@ -22,10 +25,10 @@ test {
 
 jar {
     manifest {
-        // 'Main-Class' 부분에 패키지명.메인클래스명 을 정확히 적어야 합니다.
+        // 'Main-Class'
         attributes 'Main-Class': 'Main'
     }
-    // 외부 라이브러리(SQLite 등)를 포함해서 뚱뚱한 JAR(Fat Jar) 만들기 설정
+    // 외부 라이브러리(SQLite 등)를 포함해서 Fat Jar 만들기 설정
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
