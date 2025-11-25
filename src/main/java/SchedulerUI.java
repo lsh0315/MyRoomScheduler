@@ -24,7 +24,7 @@ public class SchedulerUI extends JFrame {
 
         initUI();
 
-        // ★ 창 켜지자마자 저장된 데이터 불러오기!
+        // 창 켜지자마자 저장된 데이터 불러오기
         loadDatabaseData();
 
         setVisible(true);
