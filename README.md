@@ -17,7 +17,7 @@
 * **✅ 휴대성:** `Fat JAR` 빌드를 통해 별도 설치 없이 파일 하나로 즉시 실행 가능
 
 ### 3. 기술 스택 (Tech Stack)
-* **Language:** Java 17
+* **Language:** Java 21 (LST)
 * **Database:** SQLite (Embedded)
 * **Build Tool:** Gradle
 * **IDE:** IntelliJ IDEA
