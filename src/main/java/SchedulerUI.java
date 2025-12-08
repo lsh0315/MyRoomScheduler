@@ -65,6 +65,10 @@ public class SchedulerUI extends JFrame {
         addButton.setBackground(new Color(70, 130, 180));
         addButton.setForeground(Color.WHITE);
 
+        // ▼ [중요] 맥북에서 배경색이 보이게 하려면 이 두 줄이 꼭 필요하다고 함 씨바꺼
+        addButton.setOpaque(true);           // 불투명하게 설정 (색상이 보이게 함)
+        addButton.setBorderPainted(false);   // 테두리 그림 제거 (깔끔하게 만듦)
+
         // 버튼 클릭 이벤트
         addButton.addActionListener(e -> addSchedule());
 
