@@ -1,4 +1,4 @@
-# 📅 MyRoomScheduler (공유 자원 예약 시스템)
+# 📅 MyRoomScheduler (공유 자원 예약 시스템) - v1.1
 
 ### 1. 기획 의도 (Background)
 > **"형제간의 평화를 지키고, 편입 합격을 위한 '절대 시간'을 확보하다"**
@@ -9,14 +9,19 @@
 * **핵심 가치:** 명확한 시간 점유를 통한 갈등 해결 및 학습 효율 증대
 * **개발 기간:** 2025.11 ~ 진행 중 (현재 v1.0 MVP 단계)
 
-### 2. 현재 기능 (Features v1.0)
+### 2. 현재 기능 (Features)
 현재는 핵심 기능인 **'예약 확정'**에 집중된 MVP(Minimum Viable Product) 버전입니다.
 * **✅ 일정 등록 (Create):** 사용자가 원하는 날짜와 시간에 방 사용 예약 (DB 저장)
 * **✅ 일정 조회 (Read):** 저장된 예약 내역을 리스트 형태로 확인
 * **✅ 데이터 보존:** SQLite를 연동하여 프로그램 종료 후에도 데이터 영구 보존
 * **✅ 휴대성:** `Fat JAR` 빌드를 통해 별도 설치 없이 파일 하나로 즉시 실행 가능
+* **v1.0 (MVP):** 일정 등록(Create), 일정 조회(Read), SQLite 연동
+* **v1.1 (Update):**
+    * ✅ **일정 삭제 (Delete):** 오기입한 일정을 선택하여 DB에서 영구 삭제
+    * ✅ **UI/UX 개선:** 불필요한 ID 컬럼 숨김 처리, macOS 환경 UI 호환성 패치
 
 ### 3. 기술 스택 (Tech Stack)
+* **OS:** Windows 10/11 & **macOS (Apple Silicon)** (Cross-Platform Tested)
 * **Language:** Java 21 (LST)
 * **Database:** SQLite (Embedded)
 * **Build Tool:** Gradle
@@ -33,6 +38,18 @@
 #### 🔥 Issue 2: Gradle 빌드 인코딩 깨짐
 * **문제:** 콘솔 출력 시 한글이 `???`로 깨짐.
 * **해결:** `build.gradle`에 인코딩 옵션(`options.encoding = 'UTF-8'`)을 추가하여 해결.
+
+#### 🔥 Issue 3: 삭제 기능을 위한 식별자(ID)와 UX의 충돌
+* **문제** (Problem): DB에서 특정 데이터를 정확히 삭제하려면 고유 번호(Primary Key, ID)가 필요하여 테이블에 ID 컬럼을 추가함. 하지만 1, 2, 5...와 같은 불규칙한 숫자가 화면에 노출되면서 **사용자에게 불필요한 정보(Noise)**를 제공하고 디자인을 해치는 문제가 발생.
+
+* **원인** (Cause): 삭제 로직(DELETE WHERE ID=?)을 수행하려면 UI 컴포넌트(JTable)가 해당 행(Row)의 ID 값을 반드시 가지고 있어야 했음.
+
+* **해결** (Solution): 'Hidden Column (숨겨진 열)' 기법을 적용. DefaultTableModel에는 ID 데이터를 포함시키되, 화면 렌더링 시 해당 컬럼의 너비(Width)를 0으로 강제 설정함 (setMinWidth(0), setMaxWidth(0)). 👉 결과: 사용자는 깔끔한 화면을 보고, 프로그램 내부는 정확한 ID로 동작하도록 심미성과 기능성을 모두 확보함.
+
+#### 🔥 Issue 4: 중복된 데이터의 식별 문제
+* **문제** (Problem): 사용자가 '운동'이라는 일정을 14시와 20시에 각각 등록했을 때, 단순히 내용("운동")만으로 삭제를 시도하면 두 일정이 모두 삭제되거나 엉뚱한 일정이 삭제되는 데이터 무결성 위험이 있음.
+
+* **해결** (Solution): SQLite 테이블 생성 시 AUTO_INCREMENT 속성을 가진 **ID(Primary Key)**를 도입하여, 내용이 100% 동일하더라도 시스템 내부적으로는 서로 다른 객체로 식별하도록 DB 구조를 개선함.
 
 ---
 
