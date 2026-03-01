@@ -10,7 +10,8 @@ public class SchedulerUI extends JFrame {
     private DefaultTableModel tableModel;
     private JTable scheduleTable;
     private JComboBox<String> userCombo;
-    private JTextField timeField;
+    private JComboBox<String> startTimeCombo;  //시작 시간과 종료 시간을 고를 수 있는 드롭다운
+    private JComboBox<String> endTimeCombo;
     private JTextField contentField;
 
     // 일꾼(DAO) 불러오기
@@ -66,9 +67,22 @@ public class SchedulerUI extends JFrame {
         inputPanel.add(userCombo);
 
         inputPanel.add(new JLabel("시간:"));
-        timeField = new JTextField(10);
-        timeField.setText("14:00~16:00");
-        inputPanel.add(timeField);
+        // 00:00 부터 23:30 까지 30분 단위로 시간 목록 만들기
+        String[] timeOptions = new String[48];
+        for (int i = 0; i < 24; i++) {
+            timeOptions[i * 2] = String.format("%02d:00", i);
+            timeOptions[i * 2 + 1] = String.format("%02d:30", i);
+        }
+
+        startTimeCombo = new JComboBox<>(timeOptions);
+        startTimeCombo.setSelectedItem("14:00"); // 기본값 세팅
+
+        endTimeCombo = new JComboBox<>(timeOptions);
+        endTimeCombo.setSelectedItem("16:00");   // 기본값 세팅
+
+        inputPanel.add(startTimeCombo);
+        inputPanel.add(new JLabel("~"));
+        inputPanel.add(endTimeCombo);
 
         inputPanel.add(new JLabel("할 일:"));
         contentField = new JTextField(20);
@@ -99,10 +113,11 @@ public class SchedulerUI extends JFrame {
         add(inputPanel, BorderLayout.SOUTH);
     }
 
-    // 1. 일정 등록 함수
+    // 1. 일정 등록 함수 (중복 검사 기능 추가됨!)
     private void addSchedule() {
         String user = (String) userCombo.getSelectedItem();
-        String time = timeField.getText();
+        // 드롭다운에서 선택한 시작 시간과 종료 시간을 가져와서 중간에 "~"를 붙여 합칩니다!
+        String time = startTimeCombo.getSelectedItem() + "~" + endTimeCombo.getSelectedItem();
         String content = contentField.getText();
 
         if (content.isEmpty()) {
@@ -110,13 +125,20 @@ public class SchedulerUI extends JFrame {
             return;
         }
 
+        // ★ [새로 추가된 핵심] DB에 넣기 전에 중복 검사 먼저 실행!
+        if (dao.isOverlapping(time)) {
+            // 겹치면 경고창 띄우고 함수 종료 (저장 안 함)
+            JOptionPane.showMessageDialog(this, "❌ 앗! 그 시간엔 이미 방을 사용 중입니다.\n다른 시간을 선택해주세요.", "예약 불가", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // 안 겹치면 원래대로 저장 진행!
         boolean isSuccess = dao.addSchedule(user, time, content);
 
         if (isSuccess) {
             contentField.setText(""); // 입력창 비우기
-            // ★중요: 등록 후에는 DB에서 목록을 다시 불러옵니다.
-            // (그래야 새로 생긴 ID를 화면에 표시할 수 있음)
-            loadDatabaseData();
+            loadDatabaseData();       // 화면 새로고침
+            JOptionPane.showMessageDialog(this, "✅ 예약 성공!");
         } else {
             JOptionPane.showMessageDialog(this, "저장 실패! 에러를 확인하세요.");
         }
